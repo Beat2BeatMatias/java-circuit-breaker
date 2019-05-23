@@ -5,14 +5,25 @@ Simple circuit breaker written in Java that works as a wrapper of Restful API's 
 ## Table of contents
 
 - Cloning
+- Example
 - Usage
+  - RestClientCircuitBreaker parameters
   - RestClient implementation
+    - Resource URL
     - Helper methods
 
 # Cloning
 
 ```bash
 git clone https://www.github.com/barberogaston/java-circuit-breaker.git
+```
+
+# Example
+
+```java
+RestClientCircuitBreaker cb = new RestClientCircuitBreaker(3, 1000, new SitesRestClient("https://api.mercadolibre.com/sites"));
+
+cb.connect().get("/MLA");
 ```
 
 # Usage
@@ -28,12 +39,16 @@ public class UsersRestClient extends RestClient<User>{...}
 3. Wrap your custom client with the CircuitBreaker by passing the client to the breaker's constructor:
 
 ```java
-RestClientCircuitBreaker cb = new RestClientCircuitBreaker(..., new UserRestClient(...));
+RestClientCircuitBreaker cb = new RestClientCircuitBreaker(..., new UsersRestClient(...));
 ```
 
 4. Call the `connect()` method of the CircuitBreaker to test the resource and get a `RestClient` instance.
+
+```java
+cb.connect()
+```
    
-5. Chain the API Client method which you wish to call.
+5. Chain the RestClient method which you wish to call.
 
 ```java
 cb.connect().get("/");
@@ -41,9 +56,9 @@ cb.connect().get("/");
 
 ## RestClientCircuitBreaker parameters
 
-* **threshold:** how many times will the CircuitBreaker attempt to connect to the resource before it becomes **OPEN**
+* **threshold:** how many times will the CircuitBreaker attempt to connect to the resource before its state becomes **OPEN**
 
-* **timeoutInMillis:** time (in milliseconds) that the CircuitBreaker will wait before changin to **HALF OPEN** state
+* **timeoutInMillis:** time (in milliseconds) that the CircuitBreaker will wait before changing to **HALF OPEN** state
 
 * **client:** a `RestClient` implementation instance
 
@@ -53,9 +68,10 @@ public RestClientCircuitBreaker(int threshold, long timeoutInMillis, RestClient 
 
 ## RestClient implementation
 
-Once you extend the abstract `RestClient` class you'll have to implement the abstract method it provides: **get**, **post**, **put** and **delete**.
+Once you extend the abstract `RestClient` class you'll have to implement the abstract methods it provides: **get**, **post**, **put** and **delete**.
 
-Please note that in the Constructor there's a **resourceUrl** parameter (`RestClient(String resourceUrl)`). This is the base URL from which you'll make your API calls. For example, say I want to send a `GET` request to: `api.example.com/users/1`. The **base** URL would be `api.example.com/users`. Then, when calling the `get(String path)` method, the **path** would be `/users`.
+### Resource URL
+In the Constructor there's a **resourceUrl** parameter (`RestClient(String resourceUrl)`). This is the base URL from which you'll make your API calls. For example, say I want to send a `GET` request to: `api.example.com/users/1`. The **base** URL would be `api.example.com/users`. Then, when calling the `get(String path)` method, the **path** would be `/users`.
 
 ### Helper methods
 The `RestClient.java` abstract class has some helper methods for your child implementation
